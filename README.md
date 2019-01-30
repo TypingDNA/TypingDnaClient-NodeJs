@@ -33,7 +33,7 @@ Get the previously saved typing patterns count for a user:
 ```javascript
 typingDnaClient.check(
     { userId : 'userID',
-      type: 'extended',
+      type: '2',
       device: 'desktop'
     },
     function(error, result) {

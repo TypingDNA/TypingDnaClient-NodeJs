@@ -1,7 +1,7 @@
 /**
  * NodeJs implementation for the TypingDNA.com Auth API.
  *
- * @version 1.1
+ * @version 1.0.3
  *
  * @author Stefan Endres
  * @copyright TypingDNA.com, SC TypingDNA SRL
@@ -26,7 +26,6 @@
  * var typingDnaClient = new TypingDNAClient('Your API Key', 'Your API Secret'[, optional : 'TypingDNA API Server']);
  *
  * The default TypingDNA API Server is api.typingdna.com
- * Note: you can use the alternative Azure link tdna-api.azurewebsites.net
  *******************************************************/
 
 'use strict';
@@ -100,7 +99,7 @@ TypingDNAClient.prototype.save = function(userId, typingPattern, callback) {
  *
  * @param {object} options - A string of your choice that identifies the user.is 2.
  * @param {string} options.userId - The id of the user that is verified.
- * @param {string|string[]} options.type - The type of the typing pattern. Possible values ['typingpattern','diagram','extended'].
+ * @param {string|string[]} options.type - The type of the typing pattern. Possible values ['0','1','2']  0 for Type 0 pattern (anytext), 1 for Type 1 pattern (sametext) and 2 for Type 2 pattern (extended).
  * @param {string} options.textId - The id of text.
  * @param {string} options.device - The device on which the typing pattern was recorded. Possible values ['desktop','mobile']
  * @param {requestCallback} callback - The callback that handles the response.
@@ -157,7 +156,7 @@ TypingDNAClient.prototype.check = function(options, callback) {
  *
  * @param {object} options - A string of your choice that identifies the user.is 2.
  * @param {string} options.userId - The id of the user that is verified.
- * @param {string} options.type - The type of the typing pattern. Possible values ['typingpattern','diagram','extended'].
+ * @param {string|string[]} options.type - The type of the typing pattern. Possible values ['0','1','2'] 0 for Type 0 pattern (anytext), 1 for Type 1 pattern (sametext) and 2 for Type 2 pattern (extended).
  * @param {string} options.textId - The id of text.
  * @param {string} options.device - The device on which the typing pattern was recorded. Possible values ['desktop','mobile']
  * @param {requestCallback} callback - The callback that handles the response.
@@ -210,10 +209,12 @@ TypingDNAClient.prototype.delete = function(options, callback) {
  * @param {string} userId - The id of the user that is verified.
  * @param {string} typingPattern - The typing pattern that you want to associate with the userId.
  * @param {int} quality - A number between 1 and 3. The default is 2.
+ * @param {Object} [options] - An object conytaining extra options for this request.
+ * @param {Boolean} [options.deviceSimilarityOnly] - If True, the request will only check the device sililarity.
  * @param {requestCallback} callback - The callback that handles the response.
  **/
 
-TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, callback) {
+TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, options, callback) {
     if(typeof userId !== 'string' || userId.replace(/\s/g,'').length < 6) {
         return callback && callback(new Error('Invalid user id.'), null);
     }
@@ -223,13 +224,18 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, call
     if(typeof quality !== 'number') {
         quality = 2;
     }
+    if(typeof options === 'function') {
+        callback = options;
+        options = {}
+    }
 
     this.makeRequest({
         path: '/verify/'+ encodeURIComponent(userId),
         method: 'POST',
         formData: {
             tp: typingPattern,
-            quality: Math.max(1,Math.min(3,quality))
+            quality: Math.max(1,Math.min(3,quality)),
+            deviceSimilarityOnly: (options && options.deviceSimilarityOnly ? 1 : 0)
         }
     }, function(error, response) {
         if(error) {
@@ -240,6 +246,7 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, call
             success: response['success'] || 0,
             result: response['result'],
             score: Math.round(response['score']),
+            deviceSimilarity: parseInt(response['device_similarity']),
             confidence: parseInt(response['confidence_interval']),
             statusCode: parseInt(response['status'])
         });
@@ -254,10 +261,12 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, call
  * @param {string} typingPattern1 - The typing patterns that you want to match, separated by ';'
  * @param {string} typingPattern2 - The typing patterns anainst you want to match, separated by ';'
  * @param {int} quality - A number between 1 and 3. The default is 2.
+ * @param {Object} [options] - An object conytaining extra options for this request.
+ * @param {Boolean} [options.deviceSimilarityOnly] - If True, the request will only check the device sililarity.
  * @param {requestCallback} callback - The callback that handles the response.
  **/
 
-TypingDNAClient.prototype.match = function(typingPattern1, typingPattern2, quality, callback) {
+TypingDNAClient.prototype.match = function(typingPattern1, typingPattern2, quality, options, callback) {
     if(typeof typingPattern1 !== 'string' ||
         typingPattern1.length === 0 ||
         typeof typingPattern2 !== 'string' ||
@@ -267,6 +276,10 @@ TypingDNAClient.prototype.match = function(typingPattern1, typingPattern2, quali
     if(typeof quality !== 'number') {
         quality = 2;
     }
+    if(typeof options === 'function') {
+        callback = options;
+        options = {}
+    }
 
     this.makeRequest({
         path: '/match',
@@ -274,7 +287,8 @@ TypingDNAClient.prototype.match = function(typingPattern1, typingPattern2, quali
         formData:{
             tp1:typingPattern1,
             tp2:typingPattern2,
-            quality: Math.max(1,Math.min(3,quality))
+            quality: Math.max(1,Math.min(3,quality)),
+            deviceSimilarityOnly: (options && options.deviceSimilarityOnly ? 1 : 0)
         }
     }, function(error, response) {
         if(!error) {
@@ -285,6 +299,7 @@ TypingDNAClient.prototype.match = function(typingPattern1, typingPattern2, quali
             success: response['success'] || 0,
             result: response['result'],
             score: Math.round(response['score']),
+            deviceSimilarity: parseInt(response['device_similarity']),
             confidence: parseInt(response['confidence_interval']),
             statusCode: parseInt(response['status'])
         });
