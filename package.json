@@ -1,6 +1,6 @@
 {
   "name": "typingdnaclient",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Basic nodeJs implementation for the TypingDNA.com Auth API",
   "main": "typingdnaclient.js",
   "scripts": {

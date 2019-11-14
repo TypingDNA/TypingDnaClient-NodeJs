@@ -1,7 +1,7 @@
 /**
  * NodeJs implementation for the TypingDNA.com Auth API.
  *
- * @version 1.0.3
+ * @version 1.0.5
  *
  * @author Stefan Endres
  * @copyright TypingDNA.com, SC TypingDNA SRL
@@ -241,15 +241,19 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, opti
         if(error) {
             return callback && callback(error, null);
         }
-        callback && callback(error, {
+        var resObj = {
             message: response['message'],
             success: response['success'] || 0,
-            result: response['result'],
-            score: Math.round(response['score']),
-            deviceSimilarity: parseInt(response['device_similarity']),
-            confidence: parseInt(response['confidence_interval']),
             statusCode: parseInt(response['status'])
-        });
+        }
+        if(response['result'] !== undefined) { resObj['result'] = response['result']; }
+        if(response['score'] !== undefined) { resObj['score'] = Math.round(response['score']); }
+        if(response['net_score'] !== undefined) { resObj['netScore'] = Math.round(response['net_score']); }
+        if(response['device_similarity'] !== undefined) { resObj['deviceSimilarity'] = Math.round(response['device_similarity']); }
+        if(response['confidence_interval'] !== undefined) { resObj['confidence'] = Math.round(response['confidence_interval']); }
+        if(response['confidence'] !== undefined) { resObj['netConfidence'] = Math.round(response['confidence']); }
+
+        callback && callback(error, resObj);
     })
 };
 
@@ -294,15 +298,19 @@ TypingDNAClient.prototype.match = function(typingPattern1, typingPattern2, quali
         if(!error) {
             return callback && callback(error, null);
         }
-        callback && callback(error, {
+        var resObj = {
             message: response['message'],
             success: response['success'] || 0,
-            result: response['result'],
-            score: Math.round(response['score']),
-            deviceSimilarity: parseInt(response['device_similarity']),
-            confidence: parseInt(response['confidence_interval']),
             statusCode: parseInt(response['status'])
-        });
+        }
+        if(response['result'] !== undefined) { resObj['result'] = response['result']; }
+        if(response['score'] !== undefined) { resObj['score'] = Math.round(response['score']); }
+        if(response['net_score'] !== undefined) { resObj['netScore'] = Math.round(response['net_score']); }
+        if(response['device_similarity'] !== undefined) { resObj['deviceSimilarity'] = Math.round(response['device_similarity']); }
+        if(response['confidence_interval'] !== undefined) { resObj['confidence'] = Math.round(response['confidence_interval']); }
+        if(response['confidence'] !== undefined) { resObj['netConfidence'] = Math.round(response['confidence']); }
+
+        callback && callback(error, resObj);
     })
 };
 
