@@ -1,7 +1,7 @@
 /**
  * NodeJs implementation for the TypingDNA.com Auth API.
  *
- * @version 1.0.5
+ * @version 1.0.6
  *
  * @author Stefan Endres
  * @copyright TypingDNA.com, SC TypingDNA SRL
