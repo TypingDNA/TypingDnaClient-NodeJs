@@ -215,6 +215,10 @@ TypingDNAClient.prototype.delete = function(options, callback) {
  **/
 
 TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, options, callback) {
+    if(typeof options === 'function') {
+        callback = options;
+        options = {}
+    }
     if(typeof userId !== 'string' || userId.replace(/\s/g,'').length < 6) {
         return callback && callback(new Error('Invalid user id.'), null);
     }
@@ -223,10 +227,6 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, opti
     }
     if(typeof quality !== 'number') {
         quality = 2;
-    }
-    if(typeof options === 'function') {
-        callback = options;
-        options = {}
     }
 
     this.makeRequest({
