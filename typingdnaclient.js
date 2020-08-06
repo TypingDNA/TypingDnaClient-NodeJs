@@ -243,6 +243,7 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, opti
         }
         var resObj = {
             message: response['message'],
+            message_code: parseInt(response['message_code']),
             success: response['success'] || 0,
             statusCode: parseInt(response['status'])
         }
@@ -252,7 +253,7 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, opti
         if(response['device_similarity'] !== undefined) { resObj['deviceSimilarity'] = Math.round(response['device_similarity']); }
         if(response['confidence_interval'] !== undefined) { resObj['confidence'] = Math.round(response['confidence_interval']); }
         if(response['confidence'] !== undefined) { resObj['netConfidence'] = Math.round(response['confidence']); }
-
+        if(response['positions'] !== undefined) { resObj['positions'] = response['positions']; }
         callback && callback(error, resObj);
     })
 };
