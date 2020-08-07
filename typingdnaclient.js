@@ -1,7 +1,7 @@
 /**
  * NodeJs implementation for the TypingDNA.com Auth API.
  *
- * @version 1.0.5
+ * @version 1.0.6
  *
  * @author Stefan Endres
  * @copyright TypingDNA.com, SC TypingDNA SRL
@@ -87,6 +87,7 @@ TypingDNAClient.prototype.save = function(userId, typingPattern, callback) {
         }
         callback && callback(error, {
             message: response['message'],
+            message_code: response['message_code'],
             success: response['success'] || 0,
             statusCode: parseInt(response['status'])
         });
@@ -94,6 +95,8 @@ TypingDNAClient.prototype.save = function(userId, typingPattern, callback) {
 };
 
 /**
+ * TODO Update doc
+ * 
  * Check user method for verifying how many previous recordings you have for a user
  * Usage: typingDnaClient.check(userData, callback);
  *
@@ -141,6 +144,7 @@ TypingDNAClient.prototype.check = function(options, callback) {
         }
         callback && callback(error, {
             message: response['message'],
+            message_code: response['message_code'],
             success: response['success'] || 0,
             count: response['count'],
             mobilecount: response['mobilecount'],
@@ -195,6 +199,7 @@ TypingDNAClient.prototype.delete = function(options, callback) {
         }
         callback && callback(error, {
             message: response['message'],
+            message_code: response['message_code'],
             success: response['success'] || 0,
             result: response['deleted'],
             statusCode: parseInt(response['status'])
@@ -215,6 +220,10 @@ TypingDNAClient.prototype.delete = function(options, callback) {
  **/
 
 TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, options, callback) {
+    if(typeof options === 'function') {
+        callback = options;
+        options = {}
+    }
     if(typeof userId !== 'string' || userId.replace(/\s/g,'').length < 6) {
         return callback && callback(new Error('Invalid user id.'), null);
     }
@@ -223,10 +232,6 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, opti
     }
     if(typeof quality !== 'number') {
         quality = 2;
-    }
-    if(typeof options === 'function') {
-        callback = options;
-        options = {}
     }
 
     this.makeRequest({
@@ -243,6 +248,7 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, opti
         }
         var resObj = {
             message: response['message'],
+            message_code: parseInt(response['message_code']),
             success: response['success'] || 0,
             statusCode: parseInt(response['status'])
         }
@@ -252,7 +258,9 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, opti
         if(response['device_similarity'] !== undefined) { resObj['deviceSimilarity'] = Math.round(response['device_similarity']); }
         if(response['confidence_interval'] !== undefined) { resObj['confidence'] = Math.round(response['confidence_interval']); }
         if(response['confidence'] !== undefined) { resObj['netConfidence'] = Math.round(response['confidence']); }
-
+        if(response['positions'] !== undefined) { resObj['positions'] = response['positions']; }
+        if(response['previous_samples'] !== undefined) { resObj['previous_samples'] = response['previous_samples']; }
+        if(response['compared_samples'] !== undefined) { resObj['compared_samples'] = response['compared_samples']; }
         callback && callback(error, resObj);
     })
 };
@@ -300,6 +308,7 @@ TypingDNAClient.prototype.match = function(typingPattern1, typingPattern2, quali
         }
         var resObj = {
             message: response['message'],
+            message_code: response['message_code'],
             success: response['success'] || 0,
             statusCode: parseInt(response['status'])
         }
