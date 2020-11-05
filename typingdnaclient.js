@@ -1,7 +1,7 @@
 /**
  * NodeJs implementation for the TypingDNA.com Auth API.
  *
- * @version 1.0.5
+ * @version 1.1.1
  *
  * @author Stefan Endres
  * @copyright TypingDNA.com, SC TypingDNA SRL
@@ -57,6 +57,8 @@ var TypingDNAClient = function(apiKey, apiSecret, apiServer) {
  * @param {object} result - The result returned by the function.
  */
 
+
+
 /**
  * Save method for saving new patterns, for new or existing users
  * Usage: typingDnaClient.save(userId, typingPattern, callback);
@@ -65,7 +67,6 @@ var TypingDNAClient = function(apiKey, apiSecret, apiServer) {
  * @param {string} typingPattern - The typing pattern that you want to associate with the userId.
  * @param {requestCallback} callback - The callback that handles the response.
  **/
-
 
 TypingDNAClient.prototype.save = function(userId, typingPattern, callback) {
     if(typeof userId !== 'string' || userId.replace(/\s/g,'').length < 6) {
@@ -97,7 +98,7 @@ TypingDNAClient.prototype.save = function(userId, typingPattern, callback) {
  * Check user method for verifying how many previous recordings you have for a user
  * Usage: typingDnaClient.check(userData, callback);
  *
- * @param {object} options - A string of your choice that identifies the user.is 2.
+ * @param {object} options - Options object containing params passed to the method.
  * @param {string} options.userId - The id of the user that is verified.
  * @param {string|string[]} options.type - The type of the typing pattern. Possible values ['0','1','2']  0 for Type 0 pattern (anytext), 1 for Type 1 pattern (sametext) and 2 for Type 2 pattern (extended).
  * @param {string} options.textId - The id of text.
@@ -154,7 +155,7 @@ TypingDNAClient.prototype.check = function(options, callback) {
  * Delete user's typing patterns.
  * Usage: typingDnaClient.delete(userId, typingPattern, callback);
  *
- * @param {object} options - A string of your choice that identifies the user.is 2.
+ * @param {object} options - Options object containing params passed to the method.
  * @param {string} options.userId - The id of the user that is verified.
  * @param {string|string[]} options.type - The type of the typing pattern. Possible values ['0','1','2'] 0 for Type 0 pattern (anytext), 1 for Type 1 pattern (sametext) and 2 for Type 2 pattern (extended).
  * @param {string} options.textId - The id of text.
@@ -265,7 +266,7 @@ TypingDNAClient.prototype.verify = function(userId, typingPattern, quality, opti
  * @param {string} typingPattern1 - The typing patterns that you want to match, separated by ';'
  * @param {string} typingPattern2 - The typing patterns anainst you want to match, separated by ';'
  * @param {int} quality - A number between 1 and 3. The default is 2.
- * @param {Object} [options] - An object conytaining extra options for this request.
+ * @param {Object} [options] - An object containing extra options for this request.
  * @param {Boolean} [options.deviceSimilarityOnly] - If True, the request will only check the device sililarity.
  * @param {requestCallback} callback - The callback that handles the response.
  **/
@@ -340,6 +341,54 @@ TypingDNAClient.prototype.getQuote = function(minLength, maxLength, callback) {
             author: response['author'],
             statusCode: parseInt(response['status'])
         });
+    })
+};
+
+/**
+ * Auto route for handling enrollment and verification in one simplified interface
+ * Usage: typingDnaClient.auto(userId, typingPattern, callback);
+ *
+ * @param {string} userId - A string of your choice that identifies the user.
+ * @param {string} typingPattern - The typing pattern that you want to associate with the userId.
+ * @param {Object} {options} - An object containing extra options for this request.
+ * @param {string} options.customField - An identifier of the user/session. This field will be returned on response.
+ * @param {requestCallback} callback - The callback that handles the response.
+ **/
+TypingDNAClient.prototype.auto = function (userId, typingPattern, options, callback) {
+    if (typeof userId !== 'string' || userId.replace(/\s/g, '').length < 6) {
+        return callback && callback(new Error('Invalid user id.'), null);
+    }
+    if (typeof typingPattern !== 'string' || typingPattern.length === 0) {
+        return callback && callback(new Error('Invalid typing pattern.'), null);
+    }
+
+    if(typeof options === 'function') {
+        callback = options;
+        options = {}
+    }
+    let formData = { tp: typingPattern };
+    if (options.customField !== undefined) { formData.custom_field = options.customField; }
+
+    this.makeRequest({
+        path: '/auto/' + encodeURIComponent(userId),
+        method: 'POST',
+        formData,
+    }, function (error, response) {
+        if (error) {
+            return callback && callback(error, null);
+        }
+        let resObj = {
+            message: response['message'],
+            messageCode: response['message_code'],
+            statusCode: parseInt(response['status']),
+        }
+        if (response['action'] !== undefined) { resObj['action'] = response['action']; }
+        if (response['enrollment'] !== undefined) { resObj['enrollment'] = response['enrollment']; }
+        if (response['result'] !== undefined) { resObj['result'] = response['result']; }
+        if (response['high_confidence'] !== undefined) { resObj['highConfidence'] = response['high_confidence']; }
+        if (response['custom_field'] !== undefined) { resObj['customField'] = response['custom_field']; }
+
+        callback && callback(null, resObj);
     })
 };
 
