@@ -46,6 +46,7 @@ typingDnaClient.check(
 
 ```javascript
 typingDnaClient.check(options, callback);
+typingDnaClient.auto(userId, typingPattern, callback);
 typingDnaClient.save(userId, typingPattern, callback);
 typingDnaClient.delete(options, callback);
 typingDnaClient.verify(userId, typingPattern, quality, callback);
