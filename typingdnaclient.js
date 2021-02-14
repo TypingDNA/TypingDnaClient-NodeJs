@@ -44,7 +44,7 @@ var TypingDNAClient = function(apiKey, apiSecret, apiServer) {
     this.headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cache-Control': 'no-cache',
-        'Authorization': 'Basic ' + new Buffer(this.apiKey+':'+this.apiSecret).toString('base64')
+        'Authorization': 'Basic ' + Buffer.from(this.apiKey+':'+this.apiSecret).toString('base64')
     };
     this.server(apiServer);
 };
