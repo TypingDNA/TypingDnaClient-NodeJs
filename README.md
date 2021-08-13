@@ -1,7 +1,7 @@
 
 ![alt text](https://typingdna.com/assets/images/typingdna-logo-black.png)
 
-Basic node.js wrapper for the TypingDna API
+Basic node.js wrapper for the [TypingDNA Authentication API](https://www.typingdna.com/authentication-api.html)
 
 [![npm](https://img.shields.io/npm/v/typingdnaclient.svg)](https://www.npmjs.com/package/typingdnaclient)
 
